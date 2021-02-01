@@ -24,12 +24,16 @@ class Signin extends React.Component {
       body: JSON.stringify(this.state)
     };
 
-    fetch('http://localhost:3000/signin', requestOptions)
+    fetch('https://evening-ridge-99613.herokuapp.com/signin', requestOptions)
       .then(response => response.json())
-      .then(user => {if (user.id) {
+      .then(user => {
+        if (user.id) {
         this.props.updateUser(user);
         this.props.onRouteChange('home');
-      }});
+        } else {
+          alert('Email does not exist or wrong password');
+        }
+      });
   }
 
   render() {

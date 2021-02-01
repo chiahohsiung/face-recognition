@@ -7,13 +7,8 @@ import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import Signin from './components/Signin/Signin';
 import Register from './components/Register/Register';
 import Particles from 'react-particles-js';
-import Clarifai from 'clarifai';
-import './App.css';
 
-// clarifai api
-const app = new Clarifai.App({
- apiKey: 'Your API Key'
-});
+import './App.css';
 
 const particleSetting = {
   particles: {
@@ -27,25 +22,28 @@ const particleSetting = {
   }
 };
 
+const initialState = {
+  input: '',
+  imageUrl: '',
+  box: {},
+  route: 'signin',
+  isSignedIn: false,
+  user: {
+    id: '',
+    name: '',
+    email: '',
+    password: '',
+    entries: 0,
+    joined: ''
+  }
+};
+
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: '',
-      imageUrl: '',
-      box: {},
-      route: 'signin',
-      isSignedIn: false,
-      user: {
-        id: '',
-        name: '',
-        email: '',
-        password: '',
-        entries: 0,
-        joined: ''
-      }
-    }
+    this.state = initialState;
   }
+  
 
   calculateFaceLocation = (data) => {
     const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
@@ -71,16 +69,22 @@ class App extends Component {
 
   onButtonSubmit = (event) => {
     this.setState({imageUrl: this.state.input})
-    const requestOptions = {
+    const imageurlRequestOptions = {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({input: this.state.input})
+    };
+
+    const imageRequestOptions = {
       method: 'put',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({id: this.state.user.id})
     };
     
-    app.models
-      .predict(Clarifai.FACE_DETECT_MODEL,this.state.input)
+    fetch('https://evening-ridge-99613.herokuapp.com/imageurl', imageurlRequestOptions)
+      .then(response => response.json())
       .then(response => {
-        fetch('http://localhost:3000/image', requestOptions)
+        fetch('https://evening-ridge-99613.herokuapp.com/image', imageRequestOptions)
           .then(response => response.json())
           .then(count => {
             this.setState(Object.assign(this.state.user, {entries: count})); // modify only one attribute  
@@ -91,10 +95,10 @@ class App extends Component {
   }
 
   onRouteChange = (route) => {
-    if (route === 'home') {
+    if (route === 'singout') {
+      this.setState(initialState);
+    } else if (route === 'home') {
       this.setState({isSignedIn: true});
-    } else {
-      this.setState({isSignedIn: false});
     }
     this.setState({route: route});
   }

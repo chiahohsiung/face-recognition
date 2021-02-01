@@ -26,13 +26,17 @@ class Register extends React.Component {
     const requestOptions = {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(this.state)
+      body: JSON.stringify({
+        email: this.state.email,
+        password: this.state.password,
+        name: this.state.name
+      })
     };
 
-    fetch('http://localhost:3000/register', requestOptions)
+    fetch('https://evening-ridge-99613.herokuapp.com/register', requestOptions)
       .then(response => response.json())
       .then(user => {
-        if (user) {
+        if (user.id) {
           this.props.updateUser(user);
           this.props.onRouteChange('home');
         }});   
